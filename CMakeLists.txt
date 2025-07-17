@@ -21,22 +21,34 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(PICO_BOARD pico_w CACHE STRING "Board type")
 include(pico_sdk_import.cmake)
-project(bmp_aht_disp C CXX ASM)
+project(estacaoMetereologica C CXX ASM)
 pico_sdk_init()
 
 
 include_directories( ${CMAKE_SOURCE_DIR}/lib ) # Inclui os files .h na pasta lib
 
 add_executable(${PROJECT_NAME}  
-        bmp_aht_disp.c 
-        lib/aht20.c 
-        lib/bmp280.c 
-        lib/ssd1306.c
+        main.c 
+        lib/sensores/aht20.c 
+        lib/sensores/bmp280.c 
+        lib/perifericos/ssd1306.c
+        lib/perifericos/matriz_led.c
+        lib/perifericos/buzzer.c 
+        lib/webserver.c
         )
 
+# Generate PIO header
+pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/ws2812.pio)
+
 target_link_libraries(${PROJECT_NAME} 
-        pico_stdlib 
+        pico_stdlib
+        hardware_gpio
+        hardware_adc
+        pico_cyw43_arch_lwip_threadsafe_background
         hardware_i2c
+        hardware_pwm
+        hardware_pio
+        hardware_clocks
         )
 
 pico_enable_stdio_usb(${PROJECT_NAME} 1)
