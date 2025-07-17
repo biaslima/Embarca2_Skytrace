@@ -4,62 +4,90 @@
 
 #include "pico/cyw43_arch.h"
 #include "lwip/tcp.h"
+#include "wifi_secrets.h"
 
-#include "webserver.h" // Inclui o nosso novo cabeçalho
+#include "webserver.h"
 
-extern volatile float lim_min;
-extern volatile float lim_max;
-extern volatile float nivel_percentual;
-extern volatile bool bomba_ligada;
+extern volatile float lim_min_temp;
+extern volatile float lim_max_temp;
+extern volatile float lim_min_pressao;
+extern volatile float lim_max_pressao;
+extern volatile float lim_min_umi;
+extern volatile float lim_max_umi;
 
-#define WIFI_SSID "Jorge"
-#define WIFI_PASS "jorgealberto"
+// Variáveis para armazenar os valores atuais dos sensores
+extern float temperatura_atual;
+extern float pressao_atual;
+extern float umidade_atual;
 
 // Conteúdo da página HTML
 const char HTML_BODY[] =
-    "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Controle de Nivel</title>"
-    "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-    "<style>"
-    "body { font-family: 'Poppins', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; background: linear-gradient(135deg,rgb(104, 169, 243) 0%, #764ba2 100%); display: flex; justify-content: center; align-items: center; height: 99vh; margin: 0;  }"
-    "h1 { color: #764ba2 }"
-    ".container { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px; margin: auto;}"
-    "p { font-size: 18px; } #status { font-weight: bold; }"
-    "form { margin-top: 20px; } label { display: block; margin-bottom: 5px; font-weight: bold; }"
-    "input[type=number] { width: 90%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; }"
-    "input[type=submit] { background: white; color: #764ba2 ; padding: 10px 20px; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s, color 0.3s; }"
-    ".card-limites { background: linear-gradient(135deg, #764ba2 0%,rgb(104, 169, 243) 100%); padding: 10px; margin-top: 30px; border-radius: 10px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); text-align: left; text-align: center; color:rgb(255, 255, 255); }"
-    "</style>"
-    "<script>"
-    "function atualizar() {"
-    "  fetch('/estado').then(res => res.json()).then(data => {"
-    "    document.getElementById('nivel').innerText = data.nivel + '%';"
-    "    document.getElementById('barra').style.width = data.nivel + '%';"
-    "    document.getElementById('bomba').innerText = data.bomba ? 'LIGADA' : 'Desligada';"
-    "    document.getElementById('bomba').style.color = data.bomba ? '#4CAF50' : '#f44336';"
-    "  });"
-    "}"
-    "setInterval(atualizar, 1000);"
-    "</script></head><body onload='atualizar()'>"
-    "<div class='container'>"
-    "<div style='font-size: 48px;'>💧</div>"
-    "<h1>Controle de Nível de Água</h1>"
-    "<p style='text-align: center; font-weight: bold;'>Nível Atual:</p>"
-    "<div style='position: relative; height: 24px; background: #eee; border-radius: 12px; overflow: hidden;'>"
-    "<div id='barra' style='height: 100%; width: 0%; background:linear-gradient(135deg,rgb(104, 169, 243) 0%,rgb(107, 109, 197) 100%);;'></div>"
-    "<span id='nivel' style='position: absolute; top: 2px; left: 50%; transform: translateX(-50%); font-weight: bold; color:rgb(167, 179, 233);'></span>"
-    "</div>"
-    "<p style='font-weight: bold;'>Status da Bomba: <span id='bomba'>--</span></p>"
-    "<div class='card-limites'>"
-    "<h2>Gerenciar Limites</h2>"
-    "<form action='/limites' method='get'>"
-    "<label for='min'>Limite Mínimo (%):</label>"
-    "<input type='number' id='min' name='min' required>"
-    "<label for='max'>Limite Máximo (%):</label>"
-    "<input type='number' id='max' name='max' required>"
-    "<input type='submit' value='Atualizar Limites'>"
-        "</form>"
-        "</div>"
-    "</div></body></html>";
+"<!DOCTYPE html>\n"
+"<html>\n"
+"<head>\n"
+"<meta charset='UTF-8'>\n"
+"<title>Controle de Sensores</title>\n"
+"<meta name='viewport' content='width=device-width, initial-scale=1.0'>\n"
+"<style>\n"
+"body { font-family: sans-serif; text-align: center; padding: 10px; background: linear-gradient(135deg,rgb(139, 193, 255) 0%, #ffbb00 100%)}\n"
+".container { background: white; padding: 15px; margin: auto; max-width: 60%; border-radius: 8px; }\n"
+"h1 { color: #004ea2; font-size: 40px; }\n"
+"form { margin-top: 10px; font-size: 14px; max-width: 400px; margin: auto; }\n"
+"label { display: block; margin-top: 8px; }\n"
+"input[type='number'], input[type='submit'] { width: 100%; padding: 6px; margin-top: 4px; }\n"
+"input[type='submit'] { background: #004ea2; color: white; border-radius: 20px; border-color: #ffbb00; cursor: pointer; margin-top: 10px; width: 60%; }\n"
+"</style>\n"
+"</head>\n"
+"<body>\n"
+"<div class='container'>\n"
+"<h1>Controle de Sensores</h1>\n"
+"<p>Temperatura: <span id='temp'>--</span> °C</p>\n"
+"<p>Pressão: <span id='press'>--</span> kPa</p>\n"
+"<p>Umidade: <span id='hum'>--</span> %</p>\n"
+
+"<form action='/limites_temp' method='get'>\n"
+"<h3>Limites de Temperatura</h3>\n"
+"<label>Min (°C):</label>\n"
+"<input type='number' name='min_temp' step='0.1' required>\n"
+"<label>Max (°C):</label>\n"
+"<input type='number' name='max_temp' step='0.1' required>\n"
+"<input type='submit' value='Atualizar'>\n"
+"</form>\n"
+
+"<form action='/limites_pressao' method='get'>\n"
+"<h3>Limites de Pressão</h3>\n"
+"<label>Min (kPa):</label>\n"
+"<input type='number' name='min_pressao' step='0.1' required>\n"
+"<label>Max (kPa):</label>\n"
+"<input type='number' name='max_pressao' step='0.1' required>\n"
+"<input type='submit' value='Atualizar'>\n"
+"</form>\n"
+
+"<form action='/limites_umidade' method='get'>\n"
+"<h3>Limites de Umidade</h3>\n"
+"<label>Min (%):</label>\n"
+"<input type='number' name='min_umi' step='0.1' required>\n"
+"<label>Max (%):</label>\n"
+"<input type='number' name='max_umi' step='0.1' required>\n"
+"<input type='submit' value='Atualizar'>\n"
+"</form>\n"
+
+"<script>\n"
+"function atualizar() {\n"
+" fetch('/estado')\n"
+" .then(r => r.json())\n"
+" .then(d => {\n"
+"  document.getElementById('temp').innerText = d.temperatura.toFixed(1);\n"
+"  document.getElementById('press').innerText = d.pressao.toFixed(1);\n"
+"  document.getElementById('hum').innerText = d.umidade.toFixed(1);\n"
+" });\n"
+"}\n"
+"setInterval(atualizar, 2000);\n"
+"atualizar();\n"
+"</script>\n"
+"</div>\n"
+"</body>\n"
+"</html>\n";
 
 // Estrutura para manter o estado da resposta HTTP
 struct http_state {
@@ -90,21 +118,48 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
     struct http_state *hs = malloc(sizeof(struct http_state));
     hs->sent = 0;
 
-    if (strstr(req, "GET /limites")) {
-        char *min_str = strstr(req, "min=");
-        char *max_str = strstr(req, "max=");
+    // Processa limites de temperatura
+    if (strstr(req, "GET /limites_temp")) {
+        char *min_str = strstr(req, "min_temp=");
+        char *max_str = strstr(req, "max_temp=");
         if (min_str && max_str) {
-            sscanf(min_str, "min=%f", &lim_min);
-            sscanf(max_str, "max=%f", &lim_max);
+            sscanf(min_str, "min_temp=%f", &lim_min_temp);
+            sscanf(max_str, "max_temp=%f", &lim_max_temp);
+            printf("Limites de temperatura atualizados: Min=%.1f, Max=%.1f\n", lim_min_temp, lim_max_temp);
         }
         const char *redir_hdr = "HTTP/1.1 302 Found\r\nLocation: /\r\n\r\n";
-        hs->len = snprintf(hs->response, sizeof(hs->response), redir_hdr);
-
-    } else if (strstr(req, "GET /estado")) {
-        char json_payload[128];
+        hs->len = snprintf(hs->response, sizeof(hs->response), "%s", redir_hdr);
+    }
+    // Processa limites de pressão
+    else if (strstr(req, "GET /limites_pressao")) {
+        char *min_str = strstr(req, "min_pressao=");
+        char *max_str = strstr(req, "max_pressao=");
+        if (min_str && max_str) {
+            sscanf(min_str, "min_pressao=%f", &lim_min_pressao);
+            sscanf(max_str, "max_pressao=%f", &lim_max_pressao);
+            printf("Limites de pressão atualizados: Min=%.1f, Max=%.1f\n", lim_min_pressao, lim_max_pressao);
+        }
+        const char *redir_hdr = "HTTP/1.1 302 Found\r\nLocation: /\r\n\r\n";
+        hs->len = snprintf(hs->response, sizeof(hs->response), "%s", redir_hdr);
+    }
+    // Processa limites de umidade
+    else if (strstr(req, "GET /limites_umidade")) {
+        char *min_str = strstr(req, "min_umi=");
+        char *max_str = strstr(req, "max_umi=");
+        if (min_str && max_str) {
+            sscanf(min_str, "min_umi=%f", &lim_min_umi);
+            sscanf(max_str, "max_umi=%f", &lim_max_umi);
+            printf("Limites de umidade atualizados: Min=%.1f, Max=%.1f\n", lim_min_umi, lim_max_umi);
+        }
+        const char *redir_hdr = "HTTP/1.1 302 Found\r\nLocation: /\r\n\r\n";
+        hs->len = snprintf(hs->response, sizeof(hs->response), "%s", redir_hdr);
+    }
+    // Retorna o estado atual dos sensores em JSON
+    else if (strstr(req, "GET /estado")) {
+        char json_payload[256];
         int json_len = snprintf(json_payload, sizeof(json_payload),
-                                  "{\"nivel\":%.1f,\"bomba\":%s}",
-                                  nivel_percentual, bomba_ligada ? "true" : "false");
+                                "{\"temperatura\":%.1f,\"pressao\":%.1f,\"umidade\":%.1f}",
+                                temperatura_atual, pressao_atual, umidade_atual);
 
         hs->len = snprintf(hs->response, sizeof(hs->response),
                           "HTTP/1.1 200 OK\r\n"
@@ -112,7 +167,9 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
                           "Content-Length: %d\r\n"
                           "Connection: close\r\n\r\n%s",
                           json_len, json_payload);
-    } else {
+    }
+    // Página principal
+    else {
         hs->len = snprintf(hs->response, sizeof(hs->response),
                         "HTTP/1.1 200 OK\r\n"
                         "Content-Type: text/html\r\n"
@@ -144,7 +201,6 @@ static void start_http_server(void) {
     tcp_accept(pcb, connection_callback);
     printf("Servidor HTTP iniciado na porta 80\n");
 }
-
 
 // Função de inicialização principal do webserver
 bool webserver_init(void) {
