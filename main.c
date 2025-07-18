@@ -25,12 +25,12 @@
 #define endereco 0x3C
 
 // Limites para os sensores
-volatile float lim_min_temp = 20.0;
-volatile float lim_max_temp = 30.0;
-volatile float lim_min_pressao = 95.0;
-volatile float lim_max_pressao = 105.0;
-volatile float lim_min_umi = 40.0;
-volatile float lim_max_umi = 60.0;
+volatile float lim_min_temp = -10.0;
+volatile float lim_max_temp = 60.0;
+volatile float lim_min_pressao = 90.0;
+volatile float lim_max_pressao = 107.0;
+volatile float lim_min_umi = 0.0;
+volatile float lim_max_umi = 100.0;
 
 // Variáveis para os valores atuais dos sensores (para o webserver)
 float temperatura_atual = 0.0;
