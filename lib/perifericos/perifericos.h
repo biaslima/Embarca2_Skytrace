@@ -22,6 +22,10 @@
 
 extern float offset_temp, offset_pressao, offset_umidade; 
 
+extern bool alerta_temperatura;
+extern bool alerta_umidade;
+extern bool alerta_pressao;
+
 #define NUM_LEDS 25
 #define IS_RGBW false
 #define led_matrix_pin 7
