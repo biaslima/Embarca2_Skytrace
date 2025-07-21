@@ -39,6 +39,8 @@
   "raspberry-pi-pico.ninjaPath": "${HOME}/.pico-sdk/ninja/v1.12.1/ninja",
   "liveServer.settings.port": 5501,
   "files.associations": {
-    "webserver.h": "c"
+    "webserver.h": "c",
+    "stdlib.h": "c",
+    "pio.h": "c"
   }
 }

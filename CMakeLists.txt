@@ -32,8 +32,7 @@ add_executable(${PROJECT_NAME}
         lib/sensores/aht20.c 
         lib/sensores/bmp280.c 
         lib/perifericos/ssd1306.c
-        lib/perifericos/matriz_led.c
-        lib/perifericos/buzzer.c 
+        lib/perifericos/perifericos.c
         lib/webserver.c
         )
 

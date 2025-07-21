@@ -7,9 +7,8 @@
 
 #include "lib/sensores/aht20.h"
 #include "lib/sensores/bmp280.h"
-#include "lib/perifericos/buzzer.h"
+#include "lib/perifericos/perifericos.h"
 #include "lib/perifericos/font.h"
-#include "lib/perifericos/matriz_led.h"
 #include "lib/perifericos/ssd1306.h"
 #include "webserver.h" 
 #include "wifi_secrets.h"
@@ -37,6 +36,10 @@ float temperatura_atual = 0.0;
 float pressao_atual = 0.0;
 float umidade_atual = 0.0;
 
+bool alerta_temperatura = false;
+bool alerta_umidade = false;
+bool alerta_pressao = false; 
+
 // Trecho para modo BOOTSEL com botão B
 #include "pico/bootrom.h"
 #define botaoB 6
@@ -55,6 +58,8 @@ int main()
    // Fim do trecho para modo BOOTSEL com botão B
 
     stdio_init_all();
+    gpio_led_bitdog();
+    buzzer_init(BUZZER_PIN);
 
     // I2C do Display funcionando em 400Khz.
     i2c_init(I2C_PORT_DISP, 400 * 1000);
@@ -145,22 +150,33 @@ int main()
             // Verificação dos limites
             if (temperatura_atual < lim_min_temp || temperatura_atual > lim_max_temp) {
                 printf("ALERTA: Temperatura fora dos limites! (%.1f - %.1f)\n", lim_min_temp, lim_max_temp);
+
+                alerta_temperatura = true;
+                tocar_frequencia(500, 300);
             }
             if (pressao_atual < lim_min_pressao || pressao_atual > lim_max_pressao) {
                 printf("ALERTA: Pressão fora dos limites! (%.1f - %.1f)\n", lim_min_pressao, lim_max_pressao);
+
+                alerta_pressao = true; 
+                tocar_frequencia(750, 300);
             }
             if (umidade_atual < lim_min_umi || umidade_atual > lim_max_umi) {
                 printf("ALERTA: Umidade fora dos limites! (%.1f - %.1f)\n", lim_min_umi, lim_max_umi);
-            }
+
+                alerta_umidade = true;
+                tocar_frequencia(900, 300);
+            } 
         }
         else {
             printf("Erro na leitura do AHT20!\n");
         }
 
+        atualiza_rgb_led();
+
         sprintf(str_pa, "%.1fkPa", pressao_atual);
         sprintf(str_tmp2, "%.1fC", temperatura_atual);
         sprintf(str_umi, "%.1f%%", umidade_atual);
-    
+        
         // Atualiza o display
         ssd1306_fill(&ssd, !cor);
         ssd1306_rect(&ssd, 3, 3, 122, 60, cor, !cor);
@@ -180,6 +196,10 @@ int main()
         ssd1306_send_data(&ssd);
 
         sleep_ms(500);
+
+        alerta_pressao = false;
+        alerta_umidade = false;
+        alerta_temperatura = false;
     }
 
     return 0;
