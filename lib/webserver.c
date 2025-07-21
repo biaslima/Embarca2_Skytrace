@@ -3,12 +3,14 @@
 #include <string.h>
 #include "pico/cyw43_arch.h"
 #include "lwip/tcp.h"
-#include "wifi_secrets.h"
 #include "webserver.h"
 
 extern volatile float lim_min_temp, lim_max_temp, lim_min_pressao, lim_max_pressao, lim_min_umi, lim_max_umi;
 extern float temperatura_atual, pressao_atual, umidade_atual;
 float offset_temp = 0.0, offset_pressao = 0.0, offset_umidade = 0.0;
+
+#define WIFI_SSID "Sua Rede"
+#define WIFI_PASS "Sua senha"
 
 const char HTML_MAIN[] = 
 "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"

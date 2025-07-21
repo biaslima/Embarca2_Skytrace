@@ -11,7 +11,6 @@
 #include "lib/perifericos/font.h"
 #include "lib/perifericos/ssd1306.h"
 #include "webserver.h"
-#include "wifi_secrets.h"
 
 #define I2C_PORT i2c0               // i2c0 pinos 0 e 1, i2c1 pinos 2 e 3
 #define I2C_SDA 0                   // 0 ou 2
