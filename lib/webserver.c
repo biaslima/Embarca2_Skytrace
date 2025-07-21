@@ -74,6 +74,7 @@ const char HTML_CFG[] =
 "<form action='/ot'><b>Offset Temp:</b><input name='o' type='number' step='0.1'><button>OK</button></form>"
 "<form action='/op'><b>Offset Pressão:</b><input name='o' type='number' step='0.1'><button>OK</button></form>"
 "<form action='/ou'><b>Offset Umidade:</b><input name='o' type='number' step='0.1'><button>OK</button></form>"
+"<form action='/reset'><button type='submit'>Resetar configurações</button></form>"
 "<a href='/'>Voltar</a></body></html>";
 
 struct http_state {
@@ -210,6 +211,16 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
     }
     else if (strstr(req, "GET /ou")) {  // Offset umidade
         offset_umidade = get_param(req, "o");
+        send_redirect(tpcb);
+    } 
+    else if (strstr(req, "GET /reset")) {  // Offset umidade
+        lim_min_temp = -10.0;
+        lim_max_temp = 60.0;
+        lim_min_pressao = 90.0;
+        lim_max_pressao = 107.0;
+        lim_min_umi = 0.0;
+        lim_max_umi = 100.0;
+        offset_temp = 0, offset_pressao = 0, offset_umidade = 0;
         send_redirect(tpcb);
     }
     else {  // Página principal
