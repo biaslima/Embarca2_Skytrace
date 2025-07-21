@@ -13,6 +13,11 @@ static int buzzer_pin;
 static uint slice_num;
 static uint channel;
 
+uint32_t leds[NUM_LEDS];
+PIO pio = pio0;
+int sm = 0;
+bool leds_ativos = true; 
+
 //Inicia os LEDs RGB
 void gpio_led_bitdog(void) {
     gpio_init(LED_BLUE_PIN);
@@ -35,11 +40,11 @@ void atualiza_rgb_led() {
         gpio_put(LED_RED_PIN, true);
     } else {
         gpio_put(LED_RED_PIN, false);
-    } if (alerta_pressao == true) {
+    } if (alerta_umidade == true) {
         gpio_put(LED_BLUE_PIN, true);
     } else{
         gpio_put(LED_BLUE_PIN, false);
-    }if (alerta_umidade == true){
+    }if (alerta_pressao == true){
         gpio_put(LED_GREEN_PIN, true);
     } else {
         gpio_put(LED_GREEN_PIN, false);
@@ -87,12 +92,6 @@ void tocar_frequencia(int frequencia, int duracao_ms) {
     
     pwm_set_enabled(slice_num, false);
 }
-
-/*
-uint32_t leds[NUM_LEDS];
-PIO pio = pio0;
-int sm = 0;
-bool leds_ativos = true; 
 
 //Inicializa a matriz
 void matrix_init(PIO pio_inst, uint sm_num, uint pin) {
@@ -144,25 +143,45 @@ void update_leds(PIO pio_inst, uint sm_num) {
 }
 
 // Exibe padrão para modo específico
-void exibir_padrao(uint8_t padrao) {
+void exibir_padrao() {
     clear_matrix(pio, sm);
-    
-    switch(padrao) {
-        case 0: // Modo Conforto 
-            for (int i = 0; i < NUM_LEDS; i++) {
-                leds[i] = create_color(7, 20, 3); // Luz amarelada
-            }
-            break;
-        case 2: // Modo Segurança (vermelho)
-            for (int i = 0; i < NUM_LEDS; i++) {
-                leds[i] = create_color(0, 64, 0); // Vermelho
-            }
-            break;
 
-        default:
-            break;
+    uint8_t r = 0, g = 0, b = 0;
+
+    if (alerta_temperatura) {
+        r += 20; 
+    }
+    if (alerta_umidade) {
+        b += 20; 
+    }
+    if (alerta_pressao) {
+        g += 20; 
+    }
+
+    uint32_t cor_fundo = create_color(g, r, b);
+
+    for (int i = 0; i < NUM_LEDS; i++) {
+        leds[i] = cor_fundo;
+    }
+
+    uint8_t altura = 5;
+    uint8_t posicoes[][2] = {
+        {2, 0},
+        {2, 1},
+        {2, 2},
+        {2, 4}
+    };
+    if (alerta_pressao == true || alerta_temperatura == true || alerta_umidade == true) {
+        for (int i = 0; i < 4; i++) {
+        uint8_t x = posicoes[i][0];
+        uint8_t y = altura - 1 - posicoes[i][1];
+        uint8_t index = matriz_posicao_xy(x, y);
+        leds[index] = create_color(40, 150, 60);  
+        }
+    } else { 
+        clear_matrix(pio, sm);
     }
     
+
     update_leds(pio, sm);
 }
-*/

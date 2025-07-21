@@ -60,6 +60,9 @@ int main()
     stdio_init_all();
     gpio_led_bitdog();
     buzzer_init(BUZZER_PIN);
+    matrix_init(pio0, 0, LED_MATRIX_PIN);
+    clear_matrix(pio0, 0);
+    update_leds(pio, sm);
 
     // I2C do Display funcionando em 400Khz.
     i2c_init(I2C_PORT_DISP, 400 * 1000);
@@ -152,25 +155,25 @@ int main()
                 printf("ALERTA: Temperatura fora dos limites! (%.1f - %.1f)\n", lim_min_temp, lim_max_temp);
 
                 alerta_temperatura = true;
-                tocar_frequencia(500, 300);
+                //tocar_frequencia(500, 300);
             }
             if (pressao_atual < lim_min_pressao || pressao_atual > lim_max_pressao) {
                 printf("ALERTA: Pressão fora dos limites! (%.1f - %.1f)\n", lim_min_pressao, lim_max_pressao);
 
                 alerta_pressao = true; 
-                tocar_frequencia(750, 300);
+                //tocar_frequencia(750, 300);
             }
             if (umidade_atual < lim_min_umi || umidade_atual > lim_max_umi) {
                 printf("ALERTA: Umidade fora dos limites! (%.1f - %.1f)\n", lim_min_umi, lim_max_umi);
 
                 alerta_umidade = true;
-                tocar_frequencia(900, 300);
+                //tocar_frequencia(900, 300);
             } 
         }
         else {
             printf("Erro na leitura do AHT20!\n");
         }
-
+    exibir_padrao();   
         atualiza_rgb_led();
 
         sprintf(str_pa, "%.1fkPa", pressao_atual);
@@ -200,7 +203,12 @@ int main()
         alerta_pressao = false;
         alerta_umidade = false;
         alerta_temperatura = false;
+
+        clear_matrix(pio, sm);
+        update_leds(pio, sm); 
+        
     }
 
     return 0;
+    update_leds(pio, sm);
 }
