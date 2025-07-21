@@ -1,76 +1,56 @@
-# Utilização dos sensores AHT10, AHT20 e BMP280 na Bitdoglab.
+# 🌤️ SkyTrace — Estação Meteorológica IoT com Interface Web
 
-## Por: Wilton Lacerda Silva
+Projeto desenvolvido individualmente como parte da Tarefa 2 de Sensores e Atuadores IoT (EmbarcaTech 2).  
+A SkyTrace é uma estação meteorológica embarcada, baseada na BitDogLab (RP2040), com monitoramento contínuo de temperatura, umidade e pressão, exibição local via display OLED e acesso remoto por uma interface web responsiva.
 
-Este projeto utiliza o microcontrolador **RP2040** (Raspberry Pi Pico), sensores digitais de umidade/temperatura (**AHT20**), pressão/temperatura/altitude (**BMP280**) e um display OLED I2C (**SSD1306**).
+## ⚙️ Funcionalidades
 
-## Funcionalidades
+- Leitura contínua dos sensores:
+  - **AHT20** (temperatura e umidade)
+  - **BMP280** (pressão e temperatura)
+- Exibição local no **display OLED SSD1306**
+- Interface Web responsiva:
+  - Exibe os dados em **tempo real com gráficos**
+  - Permite configuração de **limites e offsets**
+  - Implementada em **HTML, CSS e JavaScript puro (AJAX)**
+- Alertas automáticos com:
+  - **LED RGB** (um por tipo de alerta)
+  - **Matriz de LEDs WS2812** (padrões coloridos)
+  - **Buzzer**
+- Botões físicos:
+  - **Botão A**: Reset de configurações
+  - **Botão B**: Exibe limites atuais no display
 
-- Leitura simultânea de temperatura e umidade (AHT10 ou AHT20)
-- Leitura de temperatura, pressão e cálculo de altitude (BMP280)
-- Exibição das informações em tempo real no display OLED SSD1306
-- Comunicação via barramento I2C com múltiplos dispositivos em diferentes barramentos (i2c0 e i2c1)
-- Saída dos dados para o terminal serial (debug/log)
-- Função BOOTSEL no botão B (GPIO 6) para facilitar a regravação do firmware
+## 🔧 Tecnologias e Recursos Utilizados
 
----
+- 📦 **RP2040 (BitDogLab)**
+- 📶 **Conexão Wi-Fi com CYW43**
+- 📟 **Display OLED SSD1306 (I2C)**
+- 🌡️ **Sensores AHT20 e BMP280 (I2C)**
+- 💡 **Matriz de LEDs WS2812 (5x5)**
+- 🎯 **Botões com interrupção e debounce**
+- 🧠 **Servidor HTTP leve com lwIP**
+- 🌐 **Frontend HTML/CSS/JS sem frameworks**
 
-## Hardware Necessário
+## 📝 Como usar
 
-- Raspberry Pi Pico (RP2040)
-- Sensor AHT20 (ou AHT10) — I2C
-- Sensor BMP280 — I2C
-- Display OLED SSD1306 (128x64) — I2C
-- Cabos de conexão
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/seu-usuario/skytrace.git
+   cd skytrace
+Configure sua rede Wi-Fi diretamente no arquivo webserver.c.
+Edite as linhas:
 
----
+#define WIFI_SSID "NomeDaRede"
+#define WIFI_PASS "SenhaDaRede"
+Compile e grave o código na BitDogLab com a SDK do Pico (pico-sdk).
 
-## Conexões (GPIO)
+Ao inicializar, o IP local será exibido no display OLED.
+Acesse esse IP no navegador de qualquer dispositivo na mesma rede.
 
-| Dispositivo       | Barramento | SDA   | SCL   | Endereço I2C padrão |
-|-------------------|------------|-------|-------|---------------------|
-| AHT20 + BMP280    | i2c0       | 0     | 1     | 0x38 (AHT20), 0x76/0x77 (BMP280) |
-| SSD1306 Display   | i2c1       | 14    | 15    | 0x3C                |
-| Botão B (BOOTSEL) | -          | 6     | -     | -                   |
+👤 Autor
+Anna Beatriz Silva Lima
+Projeto individual — EmbarcaTech 2 — CEPEDI
 
----
 
-## Como Funciona
 
-1. O programa inicializa os dois barramentos I2C (`i2c0` para sensores e `i2c1` para display).
-2. Inicializa e lê periodicamente os sensores AHT20 (umidade/temperatura) e BMP280 (pressão/temperatura).
-3. Calcula a altitude com base na pressão atmosférica.
-4. Mostra as informações em tempo real no display SSD1306.
-5. Exibe também os valores no terminal serial para depuração/registro.
-
----
-
-## Dependências e Compilação
-
-- SDK do Raspberry Pi Pico  
-  [https://github.com/raspberrypi/pico-sdk](https://github.com/raspberrypi/pico-sdk)
-- Bibliotecas customizadas (devem estar no projeto):
-    - `aht20.h`
-    - `bmp280.h`
-    - `ssd1306.h`
-    - `font.h`
-
-**Compile com a extensão do Raspberry Pi Pico no VS Code.**
-
----
-
-## Exemplo de Uso
-
-1. Programe o Raspberry Pi Pico com o firmware compilado.
-2. Conecte os sensores e o display conforme a tabela de pinos acima.
-3. Abra um terminal serial para acompanhar a saída de dados.
-4. O display mostrará os valores de temperatura, umidade, pressão e altitude, além de identificações do projeto.
-
----
-
-## Observações
-
-- O botão B (GPIO6) pode ser usado para entrar no modo BOOTSEL e facilitar a regravação do firmware.
-- O cálculo da altitude considera pressão ao nível do mar fixa (`101325 Pa`). Ajuste conforme necessário para maior precisão.
-
----
