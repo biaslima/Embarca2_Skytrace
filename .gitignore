@@ -1,2 +1,4 @@
 build
-!.vscode/*
+.vscode/*
+lib/wifi_secrets.h
+pico/sdk/import.cmake
