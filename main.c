@@ -172,16 +172,19 @@ int main()
             if ((temperatura_atual + offset_temp) < lim_min_temp || (temperatura_atual + offset_temp) > lim_max_temp) {
                 printf("ALERTA: Temperatura fora dos limites! (%.1f - %.1f)\n", lim_min_temp, lim_max_temp);
                 alerta_temperatura = true;
+                tocar_frequencia(500,200);
             } else { alerta_temperatura = false; } 
             
             if ((pressao_atual + offset_pressao) < lim_min_pressao || (pressao_atual + offset_pressao) > lim_max_pressao) {
                 printf("ALERTA: Pressão fora dos limites! (%.1f - %.1f)\n", lim_min_pressao, lim_max_pressao);
                 alerta_pressao = true;
+                tocar_frequencia(750,200);
             } else { alerta_pressao = false; } 
 
             if ((umidade_atual + offset_umidade) < lim_min_umi || (umidade_atual + offset_umidade) > lim_max_umi) {
                 printf("ALERTA: Umidade fora dos limites! (%.1f - %.1f)\n", lim_min_umi, lim_max_umi);
                 alerta_umidade = true;
+                tocar_frequencia(1000,200);
             } else { alerta_umidade = false; } 
         }
         else {
