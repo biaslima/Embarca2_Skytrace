@@ -11,9 +11,16 @@
 #define BUZZER_PIN 21           
 #define LED_MATRIX_PIN 7
 
-extern bool alerta_temperatura;
-extern bool alerta_umidade;
-extern bool alerta_pressao; 
+#define BUTTON_PIN_A 5   
+#define BUTTON_PIN_B 6  
+
+// Display
+#define I2C_PORT_DISP i2c1
+#define I2C_SDA_DISP 14
+#define I2C_SCL_DISP 15
+#define endereco 0x3C
+
+extern float offset_temp, offset_pressao, offset_umidade; 
 
 #define NUM_LEDS 25
 #define IS_RGBW false

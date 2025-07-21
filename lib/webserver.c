@@ -18,7 +18,7 @@ const char HTML_MAIN[] =
 "background:linear-gradient(135deg,rgba(0,82,177,1) 0%,#ffe600ff 100%);}"
 ".box{background:white;padding:18px 20px 16px 20px;border-radius:16px;margin:0 auto;max-width:360px;"
 "box-shadow:0 2px 8px #0002;text-align:center;}"
-"h1{color:#004ea2;margin-bottom:10px;margin-top:0;font-size:22px;font-weight:700;letter-spacing:1px;}"
+"h1{color:#004ea2;margin-bottom:10px;margin-top:0;font-size:40px;font-weight:700;letter-spacing:1px;}"
 ".val{font-size:17px;margin:12px 0 2px 0;color:#333;line-height:1.6;}"
 "svg{width:96%;max-width:340px;height:54px;background:#f8f8f8;margin:4px 0 8px 0;"
 "border-radius:8px;border:1px solid #ddd;display:block;mx-auto:1;}"
@@ -66,7 +66,7 @@ const char HTML_MAIN[] =
 const char HTML_CFG[] = 
 "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
 "<style>"
-"body{font-family:'Poppins',Arial,sans-serif;margin:0;background:linear-gradient(135deg,rgba(0,82,177,1) 0%,#ffe600ff 100%);display:flex;"
+"body{font-family:'Poppins',Arial,sans-serif;margin:0;background:rgba(0,82,177,1);display:flex;"
 "align-items:center;justify-content:center;min-height:100vh;}"
 ".cfg{background:white;padding:23px 18px;border-radius:16px;box-shadow:0 2px 10px #0002;max-width:500px;width:99%;text-align:center;}"
 "h2{margin:0 0 13px 0;color:#004ea2;font-size:19px;letter-spacing:1px;}"

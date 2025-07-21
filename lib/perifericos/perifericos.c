@@ -31,6 +31,13 @@ void gpio_led_bitdog(void) {
     gpio_init(LED_RED_PIN);
     gpio_set_dir(LED_RED_PIN, GPIO_OUT);
     gpio_put(LED_RED_PIN, false);
+
+     gpio_init(BUTTON_PIN_A);
+    gpio_set_dir(BUTTON_PIN_A, GPIO_IN);
+    gpio_pull_up(BUTTON_PIN_A);
+    gpio_init(BUTTON_PIN_B);
+    gpio_set_dir(BUTTON_PIN_B, GPIO_IN);
+    gpio_pull_up(BUTTON_PIN_B);
 }
 
 //Atualizar LED RGB de acordo com modo

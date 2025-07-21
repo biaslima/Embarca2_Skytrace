@@ -41,6 +41,7 @@
   "files.associations": {
     "webserver.h": "c",
     "stdlib.h": "c",
-    "pio.h": "c"
+    "pio.h": "c",
+    "perifericos.h": "c"
   }
 }
